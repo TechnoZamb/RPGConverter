@@ -1,0 +1,119 @@
+@page "/login"
+@using System.Data.Odbc
+
+@inject NavigationManager NavigationManager
+
+<PageTitle>Login</PageTitle>
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="mt-5">
+    <h4>Login su AS400</h4>
+    <div class="mb-3 mt-3">
+        <label for="system" class="form-label">Sistema</label>
+        <InputSelect id="system" class="form-select" @bind-Value="loginModel.System">
+            <option value="172.16.0.1">172.16.0.1</option>
+            <option value="172.168.16.20" selected>172.168.16.20</option>
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <InputText id="username" type="username" class="form-control" @bind-Value="loginModel.Username" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" required />
+    </div>
+
+    @if (showError)
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary" disabled="@showLoading">
+        @if (showLoading)
+        {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        }
+        Accedi
+    </button>
+</EditForm>
+
+<style>
+    body {
+        background: linear-gradient(45deg, #d6f0ff, #94d8ff);
+    }
+
+    form {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+@code {
+
+    private class LoginModel
+    {
+        public string System { get; set; } = "172.168.16.20";
+        public string Username { get; set; } = "PC";
+        public string Password { get; set; } = "PC";
+    }
+
+    [SupplyParameterFromForm] private LoginModel loginModel { get; set; } = new();
+    private bool showLoading;
+    private bool showError;
+    private string errorMessage = "";
+
+    private async Task HandleLogin()
+    {
+        showLoading = true;
+        await Task.Yield();
+
+        try
+        {
+            await using var conn = new OdbcConnection($"Driver={{IBM i Access ODBC Driver}};System={loginModel.System};Uid={loginModel.Username};Pwd={loginModel.Password};QueryTimeout=0;");
+            await conn.OpenAsync();
+            // login con successo
+            showError = false;
+        }
+        catch (Exception ex)
+        {
+            showError = true;
+            if (ex.Message.StartsWith("ERROR [28000]"))
+            {
+                errorMessage = "Credenziali errate.";
+            }
+            else
+            {
+                errorMessage = "Errore generico.";
+            }
+        }
+        finally
+        {
+            showLoading = false;
+        }
+
+        if (!showError)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+/*
+        await using var cmd = new OdbcCommand();
+        cmd.Connection = conn;
+
+        cmd.CommandText = "select count(*) from QSYS2.BOUND_MODULE_INFO where program_name='UNI904X'";
+        var moduleCount = await cmd.ExecuteScalarAsync() as int?;
+
+        if (moduleCount > 1)
+        {
+
+        }*/
+    }
+
+}

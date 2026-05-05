@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGConverter.Web", "RPGConverter.Web\RPGConverter.Web.csproj", "{C06FEA4A-B33B-4829-906E-A29914F804A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGConverter.Engine", "RPGConverter.Engine\RPGConverter.Engine.csproj", "{BB13842D-18CD-4FE9-8C7D-BFCD07EE9EB6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C06FEA4A-B33B-4829-906E-A29914F804A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C06FEA4A-B33B-4829-906E-A29914F804A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C06FEA4A-B33B-4829-906E-A29914F804A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C06FEA4A-B33B-4829-906E-A29914F804A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB13842D-18CD-4FE9-8C7D-BFCD07EE9EB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB13842D-18CD-4FE9-8C7D-BFCD07EE9EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB13842D-18CD-4FE9-8C7D-BFCD07EE9EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB13842D-18CD-4FE9-8C7D-BFCD07EE9EB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

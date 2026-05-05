@@ -1,0 +1,86 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<div class="d-flex flex-row h-100">
+    <div class="container py-3 px-5">
+        <div class="row">
+            <div class="col">
+                <h4>Programma</h4>
+                <div class="numbered-textarea-container">
+                    <div class="line-numbers">
+                        @for (var i = 1; i <= PgmText.Split('\n').Length; i++)
+                        {
+                            <span>@i</span>
+                        }
+                    </div>
+
+                    <textarea class="editor-textarea"
+                              @bind="PgmText"
+                              @bind:event="oninput"
+                              spellcheck="false"
+                              onscroll="this.parentElement.querySelector('.line-numbers').scrollTop = this.scrollTop">
+                    </textarea>
+                </div>
+            </div>
+            <div class="col">
+                <h4>Display file</h4>
+                <div class="numbered-textarea-container">
+                    <div class="line-numbers">
+                        @for (var i = 1; i <= DspfText.Split('\n').Length; i++)
+                        {
+                            <span>@i</span>
+                        }
+                    </div>
+
+                    <textarea class="editor-textarea"
+                              @bind="DspfText"
+                              @bind:event="oninput"
+                              spellcheck="false"
+                              onscroll="this.parentElement.querySelector('.line-numbers').scrollTop = this.scrollTop">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="p-4 d-flex flex-column sidebar">
+        <div class="flex-grow-1">
+            @foreach (var opt in typeof(ConverterOptions).GetProperties())
+            {
+                switch (opt.PropertyType)
+                {
+                    case { } boolType when boolType == typeof(bool):
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="@opt.Name" onchange="@((ChangeEventArgs e) => opt.SetValue(Options, e.Value))">
+                            <label class="form-check-label" for="@opt.Name">
+                                @Resources.ResourceManager.GetString(opt.Name)
+                            </label>
+                        </div>
+                        break;
+                    }
+                }
+            }
+        </div>
+        <button type="button" class="btn btn-success w-100" onclick="@ConvertClick">Converti</button>
+    </div>
+</div>
+
+
+@code {
+
+    private string PgmText { get; set; } = "";
+    private string DspfText { get; set; } = "";
+    private ConverterOptions Options { get; set; } = new();
+
+    public class ConverterOptions
+    {
+        public bool TotalFree { get; set; }
+    }
+
+    public void ConvertClick()
+    {
+        Console.WriteLine(PgmText);
+    }
+
+}
