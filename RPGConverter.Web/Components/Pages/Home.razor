@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using RPGConverter.Engine
 
 <PageTitle>Home</PageTitle>
 
@@ -65,11 +66,18 @@
         <button type="button" class="btn btn-success w-100" onclick="@ConvertClick">Converti</button>
     </div>
 </div>
-
+<style>
+    button {
+        position: fixed;
+        left: 0;
+        top: 400px;
+        width: 200px !important;
+    }
+</style>
 
 @code {
 
-    private string PgmText { get; set; } = "";
+    private string PgmText { get; set; } = "     H DATEDIT(*YMD) DATEDIT( ALTSEQ   ) DATEDIT(*YMD ALLOC  ( *SNGLVL  )\n     \n     F\n      *\n     F*\n     F*test commento\ntest1F*          AAAAAAAAAAAAAAA\n     F                                                                          alla fine";
     private string DspfText { get; set; } = "";
     private ConverterOptions Options { get; set; } = new();
 
@@ -80,7 +88,7 @@
 
     public void ConvertClick()
     {
-        Console.WriteLine(PgmText);
+        new Parser().ParsePgm(PgmText);
     }
 
 }
