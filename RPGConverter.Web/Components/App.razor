@@ -15,9 +15,10 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
     <ReconnectModal/>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script type="text/javascript" src="@Assets["app.js"]"></script>
 </body>
 
 </html>

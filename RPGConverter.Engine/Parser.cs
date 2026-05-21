@@ -4,7 +4,7 @@ namespace RPGConverter.Engine;
 
 public class Parser
 {
-    public void ParsePgm(string text)
+    public ParseResult ParsePgm(string text)
     {
         var result = new ParseResult();
 
@@ -77,6 +77,11 @@ public class Parser
                                     result.Errors.Add(new ParsingError(lineNumber, match.Index + 6, match.Length, ParsingErrorType.UnclosedOpenBracket));
                                     isError = true;
                                 }
+                                if (match.Groups[2].Value.Count(c => c == '\'') % 2 != 0)
+                                {
+                                    result.Errors.Add(new ParsingError(lineNumber, match.Index + 6, match.Length, ParsingErrorType.UnclosedApostrophe));
+                                    isError = true;
+                                }
                                 param = match.Groups[2].Value.Replace("(", "").Replace(")", "").Trim();
                             }
 
@@ -88,6 +93,8 @@ public class Parser
                 }
             }
         }
+
+        return result;
     }
 }
 
@@ -110,5 +117,6 @@ public enum ParsingErrorType
 {
     UnrecognizedSpecification,
     DuplicateControlKeyword,
-    UnclosedOpenBracket
+    UnclosedOpenBracket,
+    UnclosedApostrophe,
 }

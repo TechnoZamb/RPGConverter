@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using RPGConverter.Engine
 
+@inject IJSRuntime JS
+
 <PageTitle>Home</PageTitle>
 
 <div class="d-flex flex-row h-100">
@@ -16,12 +18,14 @@
                         }
                     </div>
 
-                    <textarea class="editor-textarea"
-                              @bind="PgmText"
-                              @bind:event="oninput"
-                              spellcheck="false"
-                              onscroll="this.parentElement.querySelector('.line-numbers').scrollTop = this.scrollTop">
-                    </textarea>
+                    <div id="textPgm" class="textarea-container">
+                        <div class="fake-textarea"></div>
+                        <textarea class="editor-textarea"
+                                  @bind="PgmText"
+                                  @bind:event="oninput"
+                                  spellcheck="false">
+                        </textarea>
+                    </div>
                 </div>
             </div>
             <div class="col">
@@ -34,12 +38,14 @@
                         }
                     </div>
 
-                    <textarea class="editor-textarea"
-                              @bind="DspfText"
-                              @bind:event="oninput"
-                              spellcheck="false"
-                              onscroll="this.parentElement.querySelector('.line-numbers').scrollTop = this.scrollTop">
-                    </textarea>
+                    <div id="dspfPgm" class="textarea-container">
+                        <div class="fake-textarea"></div>
+                        <textarea class="editor-textarea"
+                                  @bind="DspfText"
+                                  @bind:event="oninput"
+                                  spellcheck="false">
+                        </textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,16 +76,61 @@
     button {
         position: fixed;
         left: 0;
-        top: 400px;
+        top: 700px;
         width: 200px !important;
     }
 </style>
+<script type="text/javascript">
+    let editor1 = document.querySelector('#textPgm .editor-textarea');
+    let fake1 = document.querySelector('#textPgm .fake-textarea');
+    let editor2 = document.querySelector('#dspfPgm .editor-textarea');
+    let fake2 = document.querySelector('#dspfPgm .fake-textarea');
+
+    // sincronizziamo lo scroll tra l'editor, il fake e i numeri riga
+    function syncScroll(editor, fake) {
+        fake.scrollTop = editor.scrollTop;
+        fake.scrollLeft = editor.scrollLeft;
+        editor.closest(".numbered-textarea-container").querySelector(".line-numbers").scrollTop = editor.scrollTop;
+    }
+
+    editor1.addEventListener('scroll', () => syncScroll(editor1, fake1));
+    editor2.addEventListener('scroll', () => syncScroll(editor2, fake2));
+
+    editor1.addEventListener('input', () => fake1.innerHTML = editor1.value);
+    editor2.addEventListener('input', () => fake2.innerHTML = editor2.value);
+
+    let errors1 = [], errors2 = [];
+    window.clearErrors = () => errors1 = errors2 = [];
+    window.sendError = (editorNumber, line, column, span) => {
+        if (editorNumber === 1) {
+            errors1.push({ line, column, span });
+        } else {
+            errors2.push({ line, column, span });
+        }
+    };
+    window.displayErrors = () => {debugger
+        errors1 = [{"line":3,"column":21,"span":3},{"line":1,"column":20,"span":5},{"line":1,"column":10,"span":13},{"line":2,"column":25,"span":1}];
+        let text = editor1.value;
+        let spans = [];
+        errors1.sort((a, b) => a.line - b.line || a.column - b.column);
+        for (let i = 0; i < errors1.length; i++) {
+            let posInText = text.split('\n').reduce((prev, curr, index) => index < errors1[i].line - 1 ? prev + curr.length : prev, 0);
+            posInText += errors1[i].column;
+            spans.push({ pos: posInText,                   close: 0, val: '<span class="parse-error">' });
+            spans.push({ pos: posInText + errors1[i].span, close: 1, val: '</span>' });
+        }
+        spans.sort((a, b) => a.pos - b.pos || a.close - b.close);
+    };
+
+</script>
 
 @code {
 
     private string PgmText { get; set; } = "     H DATEDIT(*YMD) DATEDIT( ALTSEQ   ) DATEDIT(*YMD ALLOC  ( *SNGLVL  )\n     \n     F\n      *\n     F*\n     F*test commento\ntest1F*          AAAAAAAAAAAAAAA\n     F                                                                          alla fine";
     private string DspfText { get; set; } = "";
     private ConverterOptions Options { get; set; } = new();
+
+    private Parser parser = new();
 
     public class ConverterOptions
     {
@@ -88,7 +139,14 @@
 
     public void ConvertClick()
     {
-        new Parser().ParsePgm(PgmText);
+        var parseResult = parser.ParsePgm(PgmText);
+
+        JS.InvokeVoidAsync("clearErrors");
+        foreach (var error in parseResult.Errors)
+        {
+            JS.InvokeVoidAsync("sendError", 1, error.Line, error.Column, error.Span);
+        }
+        JS.InvokeVoidAsync("displayErrors");
     }
 
 }
